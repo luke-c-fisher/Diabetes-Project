@@ -9,7 +9,7 @@ library(tidyr)
 
 ## Load in data 
 ```{R}
-diabetesData <- read.csv('/Users/lukefisher/Desktop/Coding/repos/Health Analytics/Diabetes/Diabetes_Indicators_Binary.csv')
+diabetesData <- read.csv('/Users/lukefisher/Desktop/Coding/repos/Health_Analytics/Diabetes_Project/Diabetes_Indicators_Binary.csv')
 ```
 
 ## View data 
@@ -43,7 +43,7 @@ mod5 <- glm(Diabetes ~ HighBP + Smoker + Stroke + BMI + PhysActivity + PhysHlth,
 ```
 
 ## Create eight total confusion matrices, 
-## four by applying your models to the training data, and four by applying your models to the test data. 
+## four by applying your models to the training data, and four by applying your models to the test data. Use a Bayes Classifier. 
 ## Briefly discuss your findings. How does the error rate, sensitivity, and specificity change as the number of predictors increases?
 ```{r}
 # Use lapply to predict on train and test data
@@ -77,56 +77,59 @@ confTst1 <- confusionMatrix(tstTables[[1]], response = "yes")
 confTst2 <- confusionMatrix(tstTables[[2]], response = "yes")
 confTst3 <- confusionMatrix(tstTables[[3]], response = "yes")
 confTst4 <- confusionMatrix(tstTables[[4]], response = "yes")
+
 ```
 
 # Create a combined matrix of the confusion matrices 
 ```{r}
 # Train Data
 trnMatrx1 <- data.frame( 
-            Model = "Train Model 1",
-            Accuracy = confTrn1$overall['Accuracy'],
-            Sensitivity = confTrn1$byClass['Sensitivity'],
-            Specificity = confTrn1$byClass['Specificity'])
-trnMatrx2 <- data.frame( 
-            Model = "Train Model 2",
-            Accuracy = confTrn2$overall['Accuracy'],
-            Sensitivity = confTrn2$byClass['Sensitivity'],
-            Specificity = confTrn2$byClass['Specificity'])
-trnMatrx3 <- data.frame( 
-            Model = "Train Model 3",
-            Accuracy = confTrn3$overall['Accuracy'],
-            Sensitivity = confTrn3$byClass['Sensitivity'],
-            Specificity = confTrn3$byClass['Specificity'])
-trnMatrx4 <- data.frame(
-            Model = "Train Model 4",
-            Accuracy = confTrn4$overall['Accuracy'],
-            Sensitivity = confTrn4$byClass['Sensitivity'],
-            Specificity = confTrn4$byClass['Specificity'])
+  Model = "Train Model 1",
+  Accuracy = confTrn1$overall['Accuracy'],
+  Sensitivity = confTrn1$byClass['Sensitivity'],
+  Specificity = confTrn1$byClass['Specificity'])
 
-# Test Data
+trnMatrx2 <- data.frame( 
+  Model = "Train Model 2",
+  Accuracy = confTrn2$overall['Accuracy'],
+  Sensitivity = confTrn2$byClass['Sensitivity'],
+  Specificity = confTrn2$byClass['Specificity'])
+            
+trnMatrx3 <- data.frame( 
+  Model = "Train Model 3",
+  Accuracy = confTrn3$overall['Accuracy'],
+  Sensitivity = confTrn3$byClass['Sensitivity'],
+  Specificity = confTrn3$byClass['Specificity'])
+
+trnMatrx4 <- data.frame(
+  Model = "Train Model 4",
+  Accuracy = confTrn4$overall['Accuracy'],
+  Sensitivity = confTrn4$byClass['Sensitivity'],
+  Specificity = confTrn4$byClass['Specificity'])
+
 tstMatrx1 <- data.frame(
-            Model = "Test Model 1",
-            Accuracy = confTst1$overall['Accuracy'],
-            Sensitivity = confTst1$byClass['Sensitivity'],
-            Specificity = confTst1$byClass['Specificity'])
+  Model = "Test Model 1",
+  Accuracy = confTst1$overall['Accuracy'],
+  Sensitivity = confTst1$byClass['Sensitivity'],
+  Specificity = confTst1$byClass['Specificity'])
 
 tstMatrx2 <- data.frame(
-            Model = "Test Model 2",
-            Accuracy = confTst2$overall['Accuracy'],
-            Sensitivity = confTst2$byClass['Sensitivity'],
-            Specificity = confTst2$byClass['Specificity'])
+  Model = "Test Model 2",
+  Accuracy = confTst2$overall['Accuracy'],
+  Sensitivity = confTst2$byClass['Sensitivity'],
+  Specificity = confTst2$byClass['Specificity'])
         
 tstMatrx3 <- data.frame(
-            Model = "Test Model 3",
-            Accuracy = confTst3$overall['Accuracy'],
-            Sensitivity = confTst3$byClass['Sensitivity'],
-            Specificity = confTst3$byClass['Specificity'])
+  Model = "Test Model 3",
+  Accuracy = confTst3$overall['Accuracy'],
+  Sensitivity = confTst3$byClass['Sensitivity'],
+  Specificity = confTst3$byClass['Specificity'])
 
 tstMatrx4 <- data.frame(
-            Model = "Test Model 4",
-            Accuracy = confTst4$overall['Accuracy'],
-            Sensitivity = confTst4$byClass['Sensitivity'],
-            Specificity = confTst4$byClass['Specificity'])
+  Model = "Test Model 4",
+  Accuracy = confTst4$overall['Accuracy'],
+  Sensitivity = confTst4$byClass['Sensitivity'],
+  Specificity = confTst4$byClass['Specificity'])
 
 combinedTrnMatrx <- rbind(trnMatrx1, trnMatrx2, trnMatrx3, trnMatrx4)
 combinedTstMatrx <- rbind(tstMatrx1, tstMatrx2, tstMatrx3, tstMatrx4)
@@ -134,9 +137,19 @@ combinedTstMatrx <- rbind(tstMatrx1, tstMatrx2, tstMatrx3, tstMatrx4)
 print(combinedTrnMatrx)
 print(combinedTstMatrx)
 ```
-
 As the number of predictors increase, 
 accuracy and sensitivity grow while specificity falls. 
 This occurs as more confounding variables are accounted for with more predictors, lessening the amount of error in the regression. 
 Sensitivity grows for this same reason. Specificity decreases due to the risk of overfitting. 
 This occurs when the model starts to capture noise instead of an underlying pattern, reducing the model's ability to detect true negatives. 
+
+## Visualize the data above using an ROC curve. 
+
+```{r}
+library(pROC)
+
+# Predict on the test data 
+testProb = predict(mod4, newdata = diabetesTst, type = "response")
+testROC = roc(diabetesTst$Diabetes ~ testProb, plot = TRUE, print.auc = TRUE)
+
+```
